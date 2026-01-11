@@ -33,12 +33,9 @@ app.post('/api/sensor-data', (req, res) => {
 app.get('/api/latest', (req, res) => {
   db.all(`
   SELECT
-    id,
-    device_id,
     temperature,
     humidity,
-    battery,
-    datetime(created_at, '+8 hours') AS created_at
+    datetime(created_at, '+8 hours') AS time
   FROM sensor_data
   ORDER BY created_at DESC
   LIMIT 50
