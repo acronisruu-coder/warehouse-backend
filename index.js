@@ -32,12 +32,19 @@ app.post('/api/sensor-data', (req, res) => {
 /* 2️⃣ Сүүлийн дата авах */
 app.get('/api/latest', (req, res) => {
   db.all(`
-    SELECT * FROM sensor_data
-    ORDER BY created_at DESC
-    LIMIT 10
-  `, (err, rows) => {
-    res.json(rows);
-  });
+  SELECT
+    id,
+    device_id,
+    temperature,
+    humidity,
+    battery,
+    datetime(created_at, '+8 hours') AS created_at
+  FROM sensor_data
+  ORDER BY created_at DESC
+  LIMIT 10
+`, (err, rows) => {
+  res.json(rows);
+});
 });
 
 app.listen(3000, "0.0.0.0", () => {
