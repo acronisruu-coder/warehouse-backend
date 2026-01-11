@@ -41,7 +41,7 @@ app.get('/api/latest', (req, res) => {
     datetime(created_at, '+8 hours') AS created_at
   FROM sensor_data
   ORDER BY created_at DESC
-  LIMIT 10
+  LIMIT 50
 `, (err, rows) => {
   res.json(rows);
 });
