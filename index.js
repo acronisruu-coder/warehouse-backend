@@ -9,18 +9,20 @@ app.use(cors());
 app.use(express.json());
 
 /* ===============================
- // ESP32 → BACKEND
+ * ESP32 → SENSOR DATA
+ * =============================== */
 app.post("/api/sensor-data", (req, res) => {
   const { sensor_id, warehouse, temperature, humidity } = req.body;
 
   if (!sensor_id || temperature === undefined) {
-    return res.status(400).json({ error: "sensor_id required" });
+    return res.status(400).json({
+      error: "sensor_id and temperature required"
+    });
   }
 
-  // sensor_id → device_id
   const sql = `
     INSERT INTO sensor_data
-    (device_id, warehouse, temperature, humidity)
+    (sensor_id, warehouse, temperature, humidity)
     VALUES (?, ?, ?, ?)
   `;
 
@@ -28,17 +30,22 @@ app.post("/api/sensor-data", (req, res) => {
     sql,
     [sensor_id, warehouse || null, temperature, humidity || null],
     err => {
-      if (err) return res.status(500).json({ error: err.message });
+      if (err) {
+        console.error("DB INSERT ERROR:", err.message);
+        return res.status(500).json({ error: err.message });
+      }
       res.json({ status: "saved" });
     }
   );
 });
 
-// BACKEND → FRONTEND
+/* ===============================
+ * FRONTEND → LATEST
+ * =============================== */
 app.get("/api/latest", (req, res) => {
   const sql = `
     SELECT
-      device_id AS sensor_id,
+      sensor_id,
       warehouse,
       temperature,
       humidity,
@@ -48,11 +55,16 @@ app.get("/api/latest", (req, res) => {
   `;
 
   db.all(sql, (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) {
+      console.error("DB SELECT ERROR:", err.message);
+      return res.status(500).json({ error: err.message });
+    }
 
     const latest = {};
     rows.forEach(r => {
-      if (!latest[r.sensor_id]) latest[r.sensor_id] = r;
+      if (!latest[r.sensor_id]) {
+        latest[r.sensor_id] = r;
+      }
     });
 
     res.json(Object.values(latest));
@@ -63,6 +75,6 @@ app.get("/api/latest", (req, res) => {
  * START
  * =============================== */
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log("✅ Backend running on port", PORT)
-);
+app.listen(PORT, () => {
+  console.log("✅ Backend running on port", PORT);
+});
