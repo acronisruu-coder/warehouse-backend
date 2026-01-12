@@ -9,21 +9,18 @@ app.use(cors());
 app.use(express.json());
 
 /* ===============================
- * ESP32 → SENSOR DATA
- * =============================== */
+ // ESP32 → BACKEND
 app.post("/api/sensor-data", (req, res) => {
   const { sensor_id, warehouse, temperature, humidity } = req.body;
 
   if (!sensor_id || temperature === undefined) {
-    return res
-      .status(400)
-      .json({ error: "sensor_id and temperature required" });
+    return res.status(400).json({ error: "sensor_id required" });
   }
 
-  // ⚠️ DB-д device_id гэж хадгална
+  // sensor_id → device_id
   const sql = `
     INSERT INTO sensor_data
-    (sensor_id, warehouse, temperature, humidity)
+    (device_id, warehouse, temperature, humidity)
     VALUES (?, ?, ?, ?)
   `;
 
@@ -31,18 +28,13 @@ app.post("/api/sensor-data", (req, res) => {
     sql,
     [sensor_id, warehouse || null, temperature, humidity || null],
     err => {
-      if (err) {
-        console.error(err.message);
-        return res.status(500).json({ error: err.message });
-      }
+      if (err) return res.status(500).json({ error: err.message });
       res.json({ status: "saved" });
     }
   );
 });
 
-/* ===============================
- * FRONTEND → LATEST
- * =============================== */
+// BACKEND → FRONTEND
 app.get("/api/latest", (req, res) => {
   const sql = `
     SELECT
@@ -56,10 +48,7 @@ app.get("/api/latest", (req, res) => {
   `;
 
   db.all(sql, (err, rows) => {
-    if (err) {
-      console.error(err.message);
-      return res.status(500).json({ error: err.message });
-    }
+    if (err) return res.status(500).json({ error: err.message });
 
     const latest = {};
     rows.forEach(r => {
