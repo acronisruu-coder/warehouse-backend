@@ -6,7 +6,7 @@ db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS sensor_data (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      device_id TEXT,
+      sensor_id TEXT,
       warehouse TEXT,
       temperature REAL,
       humidity REAL,
