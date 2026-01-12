@@ -23,7 +23,7 @@ app.post("/api/sensor-data", (req, res) => {
   // ⚠️ DB-д device_id гэж хадгална
   const sql = `
     INSERT INTO sensor_data
-    (device_id, warehouse, temperature, humidity)
+    (sensor_id, warehouse, temperature, humidity)
     VALUES (?, ?, ?, ?)
   `;
 
