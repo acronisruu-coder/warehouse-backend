@@ -49,7 +49,7 @@ app.get("/api/latest", (req, res) => {
       warehouse,
       temperature,
       humidity,
-      created_at
+      datetime(created_at, '+8 hours') AS created_at
     FROM sensor_data
     ORDER BY created_at DESC
   `;
